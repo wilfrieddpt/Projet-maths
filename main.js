@@ -618,7 +618,7 @@ StochasticSimulation.prototype.stepSimulation = function () {
 
 // let's go
 let simulation = new StochasticSimulation("simulation", {
-  Nx: 50,
-  Ny: 90,
+  Nx: 80,
+  Ny: 50,
 })
 simulation.setup()
