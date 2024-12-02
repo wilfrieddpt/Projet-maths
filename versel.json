@@ -1,9 +1,5 @@
 {
-    "builds": [
-      { "src": "front.html", "use": "@vercel/static" },
-      { "src": "style.css", "use": "@vercel/static" }
-    ],
-    "routes": [
-      { "src": "/", "dest": "/front.html" }
+    "rewrites": [
+      { "source": "/", "destination": "/front.html" }
     ]
-  }
+}
