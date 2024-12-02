@@ -1,0 +1,25 @@
+input[type=range] {
+    appearance: none;
+    height: 4px;
+    background: #ddd;
+  }
+  
+  input[type=range]::-webkit-slider-thumb, input[type=range]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+  }
+  
+  .sliderContainer {
+    padding: 0;
+    margin: 0;
+  }
+  
+  #version {
+    font-size: 70%;
+    color: #aaa;
+    text-align: center;
+  }
