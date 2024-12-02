@@ -1,9 +1,5 @@
 "use strict"
 
-/* Stochastic SIR simulation
-   by pierreb24
-*/
-
 /* Individual */
 const State = {
   S: "susceptible",
