@@ -154,8 +154,8 @@ StochasticSimulation.prototype.setupDraw = function () {
   this.ctx.innerHTML = "" // remove everything
 
   // add sliders and start button
-  let inputsArea = document.createElement("div")
-  this.ctx.appendChild(inputsArea)
+  let inputsArea = document.createElement("controls")
+  inputsArea.innerHTML = "" 
 
   makeSlider(
     inputsArea,
