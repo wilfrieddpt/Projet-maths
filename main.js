@@ -32,7 +32,7 @@ Individual.prototype.dead = function (rate) {
 }
 
 Individual.prototype.vaccinate = function (rate) {
-  if (this.state != State.D && Math.random() <= rate) {
+  if (this.state == State.I && Math.random() <= rate) {
     this.state = State.V
   }
 }
