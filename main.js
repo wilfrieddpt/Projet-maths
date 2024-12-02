@@ -149,13 +149,12 @@ function makeSlider(parent, name, min, max, step, getValueCallback, setValueCall
   outputSlider.value = getValueCallback()
 }
 
-
 StochasticSimulation.prototype.setupDraw = function () {
   this.ctx.innerHTML = "" // remove everything
 
   // add sliders and start button
-  let inputsArea = document.createElement("controls")
-  inputsArea.innerHTML = "" 
+  let inputsArea = document.getElementById("controls")
+  inputsArea.innerHTML = "" // clear previous controls
 
   makeSlider(
     inputsArea,
@@ -322,7 +321,7 @@ StochasticSimulation.prototype.setupDraw = function () {
   let canvas = document.createElement("canvas")
   canvas.id = "simulationChart"
   canvas.width = Math.max(400, this.config.Nx * sz)
-  canvas.heigth = 1000
+  canvas.height = 1000
   this.ctx.appendChild(canvas)
 
   this.chart = new Chart(canvas, {
