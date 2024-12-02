@@ -206,10 +206,10 @@ StochasticSimulation.prototype.setupDraw = function () {
     100,
     1,
     () => {
-      return this.config.dRate * 100
+      return this.config.vRate * 100
     },
     (value) => {
-      this.config.dRate = value / 100
+      this.config.vRate = value / 100
     },
   )
 
