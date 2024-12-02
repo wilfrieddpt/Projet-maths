@@ -32,7 +32,7 @@ Individual.prototype.dead = function (rate) {
 }
 
 Individual.prototype.vaccinate = function (rate) {
-  if (this.state == State.I && Math.random() <= rate) {
+  if (this.state != State.D && Math.random() <= rate) {
     this.state = State.V
   }
 }
@@ -41,13 +41,13 @@ Individual.prototype.vaccinate = function (rate) {
 let StochasticSimulationDefaultConfig = {
   Nx: 10,
   Ny: 10,
-  iRate: 0.2,
-  rRate: 0.1,
-  vRate: 0.1,
+  iRate: 0,
+  rRate: 0,
+  vRate: 0,
   travelRadius: 3,
   nMeeting: 4,
   percentStartInfected: 0.01,
-  dRate: 0.1,
+  dRate: 0,
   maxSteps: 500,
   dotRadius: 8,
   dotPadding: 2,
