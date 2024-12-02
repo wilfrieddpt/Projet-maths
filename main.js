@@ -321,7 +321,7 @@ StochasticSimulation.prototype.setupDraw = function () {
   let canvas = document.createElement("canvas")
   canvas.id = "simulationChart"
   canvas.width = Math.max(400, this.config.Nx * sz)
-  canvas.height = 1000
+  canvas.height = 300 
   this.ctx.appendChild(canvas)
 
   this.chart = new Chart(canvas, {
