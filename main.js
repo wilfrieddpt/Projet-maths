@@ -671,7 +671,7 @@ StochasticSimulation.prototype.stepSimulation = function () {
   newInfected.forEach((i) => {
     if (!this.infected.includes(i)) {
       this.infected.push(i);
-      this.nInfected[0]++;
+      newlyInfected++;
     }
   });
 
