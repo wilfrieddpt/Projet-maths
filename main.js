@@ -13,9 +13,17 @@ const Individual = function (state = State.S) {
   this.state = state
 }
 
-Individual.prototype.infect = function (rate, reinfectionRate) {
+Individual.prototype.infect = function (rate) {
   if ((this.state == State.S || this.state == State.R || this.state == State.V) && Math.random() <= rate) {
     this.state = State.I
+  }
+}
+
+Individual.prototype.reinfect = function (rateRecovered, rateVaccinated) {
+  if (this.state == State.R && Math.random() <= rateRecovered) {
+    this.state = State.I;
+  } else if (this.state == State.V && Math.random() <= rateVaccinated) {
+    this.state = State.I;
   }
 }
 
@@ -62,6 +70,8 @@ let StochasticSimulationDefaultConfig = {
   colorVaccinated: "rgba(226, 198, 0, .5)",
   colorVaccinatedBg: "rgba(226, 198, 0, .1)",
   timeBetweenSteps: 100,
+  reinfectionRateRecovered: 0.05, // Add reinfection rate for recovered individuals
+  reinfectionRateVaccinated: 0.02, // Add reinfection rate for vaccinated individuals
 }
 
 const StochasticSimulation = function (ctx, config) {
