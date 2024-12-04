@@ -324,7 +324,7 @@ StochasticSimulation.prototype.setupDraw = function () {
   canvas.height = 400
   this.ctx.appendChild(canvas)
 
-  this.chart = new Chart(canvas, {
+  this.chart = new Chart(canvas, {  // eslint-disable-line
     type: "line",
     data: {
       labels: [],
