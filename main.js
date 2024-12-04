@@ -239,6 +239,34 @@ StochasticSimulation.prototype.setupDraw = function () {
 
   makeSlider(
     inputsArea,
+    "Taux de réinfection (guéris), r (%)",
+    0,
+    100,
+    1,
+    () => {
+      return this.config.reinfectionRateRecovered * 100
+    },
+    (value) => {
+      this.config.reinfectionRateRecovered = value / 100
+    },
+  )
+  
+  makeSlider(
+    inputsArea,
+    "Taux de réinfection (vaccinés), r (%)",
+    0,
+    100,
+    1,
+    () => {
+      return this.config.reinfectionRateVaccinated * 100
+    },
+    (value) => {
+      this.config.reinfectionRateVaccinated = value / 100
+    },
+  )
+
+  makeSlider(
+    inputsArea,
     "Rayon, r<sub>m</sub>",
     1,
     Math.round(
@@ -606,6 +634,20 @@ StochasticSimulation.prototype.stepSimulation = function () {
         let neighbor = this.individuals[neighborIndex];
         if (neighbor.state === State.S) {
           neighbor.infect(this.config.iRate);
+          if (neighbor.state === State.I) {
+            newInfected.push(neighborIndex);
+            this.changedState.push(neighborIndex);
+            newlyInfected++;
+          }
+        } else if (neighbor.state === State.R) {
+          neighbor.reinfect(this.config.reinfectionRateRecovered, 0);
+          if (neighbor.state === State.I) {
+            newInfected.push(neighborIndex);
+            this.changedState.push(neighborIndex);
+            newlyInfected++;
+          }
+        } else if (neighbor.state === State.V) {
+          neighbor.reinfect(0, this.config.reinfectionRateVaccinated);
           if (neighbor.state === State.I) {
             newInfected.push(neighborIndex);
             this.changedState.push(neighborIndex);
