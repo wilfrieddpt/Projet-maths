@@ -20,12 +20,12 @@ Individual.prototype.infect = function (rate) {
 }
 
 Individual.prototype.reinfect = function (rateRecovered, rateVaccinated) {
-  if (this.state == State.R && Math.random() <= rateRecovered) {
+  if (this.state === State.R && Math.random() <= rateRecovered) {
     this.state = State.I;
-  } else if (this.state == State.V && Math.random() <= rateVaccinated) {
+  } else if (this.state === State.V && Math.random() <= rateVaccinated) {
     this.state = State.I;
   }
-}
+};
 
 Individual.prototype.recover = function (rate) {
   if (this.state == State.I && Math.random() <= rate) {
@@ -244,12 +244,12 @@ StochasticSimulation.prototype.setupDraw = function () {
     100,
     1,
     () => {
-      return this.config.reinfectionRateRecovered * 100
+      return this.config.reinfectionRateRecovered * 100;
     },
     (value) => {
-      this.config.reinfectionRateRecovered = value / 100
-    },
-  )
+      this.config.reinfectionRateRecovered = value / 100;
+    }
+  );
   
   makeSlider(
     inputsArea,
@@ -258,12 +258,12 @@ StochasticSimulation.prototype.setupDraw = function () {
     100,
     1,
     () => {
-      return this.config.reinfectionRateVaccinated * 100
+      return this.config.reinfectionRateVaccinated * 100;
     },
     (value) => {
-      this.config.reinfectionRateVaccinated = value / 100
-    },
-  )
+      this.config.reinfectionRateVaccinated = value / 100;
+    }
+  );
 
   makeSlider(
     inputsArea,
@@ -474,43 +474,35 @@ StochasticSimulation.prototype.resetDraw = function () {
 }
 
 StochasticSimulation.prototype.updateDraw = function () {
-  // update svg
+  // Mise à jour des éléments SVG
   this.changedState.forEach((index) => {
-    let individual = this.individuals[index]
+    let individual = this.individuals[index];
     this.svgArea.findOne(`.dot-${index}`).attr({
       fill:
-        individual.state == State.I
+        individual.state === State.I
           ? this.config.colorInfected
-          : individual.state == State.D
+          : individual.state === State.D
           ? this.config.colorDead
-          : individual.state == State.V
+          : individual.state === State.V
           ? this.config.colorVaccinated
-          : this.config.colorRecovered,
-    })
-  })
+          : individual.state === State.R
+          ? this.config.colorRecovered
+          : this.config.colorSusceptible,
+    });
+  });
 
-  this.changedState = []
+  this.changedState = [];
 
-  // update chart
-  this.chart.data.datasets[0].data.push(
-    (this.nSusceptible.slice(-1)[0] / this.N) * 100,
-  )
-  this.chart.data.datasets[1].data.push(
-    (this.nInfected.slice(-1)[0] / this.N) * 100,
-  )
-  this.chart.data.datasets[2].data.push(
-    (this.nRecovered.slice(-1)[0] / this.N) * 100,
-  )
-  this.chart.data.datasets[3].data.push(
-    (this.nDead.slice(-1)[0] / this.N) * 100,
-  )
-  this.chart.data.datasets[4].data.push(
-    (this.nVaccinated.slice(-1)[0] / this.N) * 100,
-  )
+  // Mise à jour du graphique
+  this.chart.data.datasets[0].data.push((this.nSusceptible[0] / this.N) * 100);
+  this.chart.data.datasets[1].data.push((this.nInfected[0] / this.N) * 100);
+  this.chart.data.datasets[2].data.push((this.nRecovered[0] / this.N) * 100);
+  this.chart.data.datasets[3].data.push((this.nDead[0] / this.N) * 100);
+  this.chart.data.datasets[4].data.push((this.nVaccinated[0] / this.N) * 100);
 
-  this.chart.data.labels.push(this.chart.data.labels.slice(-1)[0] + 1)
-  this.chart.update()
-}
+  this.chart.data.labels.push(this.chart.data.labels.slice(-1)[0] + 1);
+  this.chart.update();
+};
 
 /* --- Simulate */
 StochasticSimulation.prototype.toGridCoordinates = function (index) {
@@ -597,18 +589,20 @@ StochasticSimulation.prototype.setupSimulation = function () {
 }
 
 StochasticSimulation.prototype.stepSimulation = function () {
-  if (this.infected.length == 0) return; // Pas d'infectés : simulation terminée
+  if (this.infected.length === 0) return; // Pas d'infectés : simulation terminée
 
   let newInfected = [];
-  this.changedState = [];
-  let newDead = [];
-  let newVaccinated = [];
   let newlyInfected = 0;
   let newlyRecovered = 0;
   let newlyDead = 0;
   let newlyVaccinated = 0;
 
-  this.infected.forEach((index) => {
+  this.changedState = [];
+
+  // Parcourir une copie de la liste des infectés pour éviter les modifications pendant l'itération
+  const currentInfected = [...this.infected];
+
+  currentInfected.forEach((index) => {
     let individual = this.individuals[index];
 
     // Tenter récupération, décès ou vaccination
@@ -616,20 +610,35 @@ StochasticSimulation.prototype.stepSimulation = function () {
     individual.dead(this.config.dRate);
     individual.vaccinate(this.config.vRate);
 
+    // Gérer les transitions d'état
     if (individual.state === State.D) {
-      newDead.push(index);
+      // Passer de I à D
+      this.nInfected.pop();
+      this.nDead[0] += 1;
       this.changedState.push(index);
       newlyDead++;
+      // Retirer de la liste des infectés
+      this.infected = this.infected.filter((i) => i !== index);
     } else if (individual.state === State.V) {
-      newVaccinated.push(index);
+      // Passer de I à V
+      this.nInfected.pop();
+      this.nVaccinated[0] += 1;
       this.changedState.push(index);
       newlyVaccinated++;
+      // Retirer de la liste des infectés
+      this.infected = this.infected.filter((i) => i !== index);
     } else if (individual.state === State.R) {
+      // Passer de I à R
+      this.nInfected.pop();
+      this.nRecovered[0] += 1;
       this.changedState.push(index);
       newlyRecovered++;
-    } else if (individual.state === State.I) {
+      // Retirer de la liste des infectés
+      this.infected = this.infected.filter((i) => i !== index);
+    }
+
+    if (individual.state === State.I) {
       // Toujours infecté : propager l'infection
-      newInfected.push(index);
       this.selectNeighboursOf(index).forEach((neighborIndex) => {
         let neighbor = this.individuals[neighborIndex];
         if (neighbor.state === State.S) {
@@ -658,15 +667,17 @@ StochasticSimulation.prototype.stepSimulation = function () {
     }
   });
 
-  // Mettre à jour la liste des infectés et les compteurs
-  this.infected = newInfected;
-  this.nSusceptible.push(this.nSusceptible.slice(-1)[0] - newlyInfected);
-  this.nInfected.push(newInfected.length);
-  this.nRecovered.push(this.nRecovered.slice(-1)[0] + newlyRecovered);
-  this.nDead.push(this.nDead.slice(-1)[0] + newlyDead);
-  this.nVaccinated.push(this.nVaccinated.slice(-1)[0] + newlyVaccinated);
-};
+  // Ajouter les nouveaux infectés
+  newInfected.forEach((i) => {
+    if (!this.infected.includes(i)) {
+      this.infected.push(i);
+      this.nInfected[0] += 1;
+    }
+  });
 
+  // Mettre à jour les comptages dans le graphique
+  this.nSusceptible[0] = this.N - this.nInfected[0] - this.nRecovered[0] - this.nDead[0] - this.nVaccinated[0];
+};
 
 // let's go
 let simulation = new StochasticSimulation("simulation", {
