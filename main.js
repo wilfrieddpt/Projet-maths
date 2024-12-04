@@ -677,7 +677,17 @@ StochasticSimulation.prototype.stepSimulation = function () {
 
   // Mettre à jour les comptages dans le graphique
   this.nSusceptible[0] = this.N - this.nInfected[0] - this.nRecovered[0] - this.nDead[0] - this.nVaccinated[0];
+
+  
+  // Mettre à jour la liste des infectés et les compteurs
+  this.infected = newInfected;
+  this.nSusceptible.push(this.nSusceptible.slice(-1)[0] - newlyInfected);
+  this.nInfected.push(newInfected.length);
+  this.nRecovered.push(this.nRecovered.slice(-1)[0] + newlyRecovered);
+  this.nDead.push(this.nDead.slice(-1)[0] + newlyDead);
+  this.nVaccinated.push(this.nVaccinated.slice(-1)[0] + newlyVaccinated);
 };
+
 
 // let's go
 let simulation = new StochasticSimulation("simulation", {
