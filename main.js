@@ -23,10 +23,6 @@ Individual.prototype.recover = function (rate) {
   if (this.state == State.I && Math.random() <= rate) {
     this.state = State.R
   }
-  else
-  {
-    this.state = State.S
-  }
 }
 
 Individual.prototype.dead = function (rate) {
