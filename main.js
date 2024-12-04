@@ -591,7 +591,7 @@ StochasticSimulation.prototype.setupSimulation = function () {
 StochasticSimulation.prototype.stepSimulation = function () {
   if (this.infected.length === 0) return; // Pas d'infectés : simulation terminée
 
-  let newInfected = [];
+  let newInfected = new Set();
   let newlyInfected = 0;
   let newlyRecovered = 0;
   let newlyDead = 0;
@@ -613,24 +613,24 @@ StochasticSimulation.prototype.stepSimulation = function () {
     // Gérer les transitions d'état
     if (individual.state === State.D) {
       // Passer de I à D
-      this.nInfected.pop();
-      this.nDead[0] += 1;
+      this.nInfected[0]--;
+      this.nDead[0]++;
       this.changedState.push(index);
       newlyDead++;
       // Retirer de la liste des infectés
       this.infected = this.infected.filter((i) => i !== index);
     } else if (individual.state === State.V) {
       // Passer de I à V
-      this.nInfected.pop();
-      this.nVaccinated[0] += 1;
+      this.nInfected[0]--;
+      this.nVaccinated[0]++;
       this.changedState.push(index);
       newlyVaccinated++;
       // Retirer de la liste des infectés
       this.infected = this.infected.filter((i) => i !== index);
     } else if (individual.state === State.R) {
       // Passer de I à R
-      this.nInfected.pop();
-      this.nRecovered[0] += 1;
+      this.nInfected[0]--;
+      this.nRecovered[0]++;
       this.changedState.push(index);
       newlyRecovered++;
       // Retirer de la liste des infectés
@@ -644,21 +644,21 @@ StochasticSimulation.prototype.stepSimulation = function () {
         if (neighbor.state === State.S) {
           neighbor.infect(this.config.iRate);
           if (neighbor.state === State.I) {
-            newInfected.push(neighborIndex);
+            newInfected.add(neighborIndex);
             this.changedState.push(neighborIndex);
             newlyInfected++;
           }
         } else if (neighbor.state === State.R) {
           neighbor.reinfect(this.config.reinfectionRateRecovered, 0);
           if (neighbor.state === State.I) {
-            newInfected.push(neighborIndex);
+            newInfected.add(neighborIndex);
             this.changedState.push(neighborIndex);
             newlyInfected++;
           }
         } else if (neighbor.state === State.V) {
           neighbor.reinfect(0, this.config.reinfectionRateVaccinated);
           if (neighbor.state === State.I) {
-            newInfected.push(neighborIndex);
+            newInfected.add(neighborIndex);
             this.changedState.push(neighborIndex);
             newlyInfected++;
           }
@@ -667,25 +667,26 @@ StochasticSimulation.prototype.stepSimulation = function () {
     }
   });
 
-  // Ajouter les nouveaux infectés
+  // Ajouter les nouveaux infectés sans doublons
   newInfected.forEach((i) => {
     if (!this.infected.includes(i)) {
       this.infected.push(i);
-      this.nInfected[0] += 1;
+      this.nInfected[0]++;
     }
   });
 
   // Mettre à jour les comptages dans le graphique
   this.nSusceptible[0] = this.N - this.nInfected[0] - this.nRecovered[0] - this.nDead[0] - this.nVaccinated[0];
 
-  
-  // Mettre à jour la liste des infectés et les compteurs
-  this.infected = newInfected;
-  this.nSusceptible.push(this.nSusceptible.slice(-1)[0] - newlyInfected);
-  this.nInfected.push(newInfected.length);
-  this.nRecovered.push(this.nRecovered.slice(-1)[0] + newlyRecovered);
-  this.nDead.push(this.nDead.slice(-1)[0] + newlyDead);
-  this.nVaccinated.push(this.nVaccinated.slice(-1)[0] + newlyVaccinated);
+  // Mise à jour du graphique
+  this.chart.data.datasets[0].data.push((this.nSusceptible[0] / this.N) * 100);
+  this.chart.data.datasets[1].data.push((this.nInfected[0] / this.N) * 100);
+  this.chart.data.datasets[2].data.push((this.nRecovered[0] / this.N) * 100);
+  this.chart.data.datasets[3].data.push((this.nDead[0] / this.N) * 100);
+  this.chart.data.datasets[4].data.push((this.nVaccinated[0] / this.N) * 100);
+
+  this.chart.data.labels.push(this.chart.data.labels.length);
+  this.chart.update();
 };
 
 
