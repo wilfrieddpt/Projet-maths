@@ -671,12 +671,19 @@ StochasticSimulation.prototype.stepSimulation = function () {
   newInfected.forEach((i) => {
     if (!this.infected.includes(i)) {
       this.infected.push(i);
-      newlyInfected++;
+      this.nInfected[0]++;
     }
   });
 
   // Mettre à jour les comptages dans le graphique
   this.nSusceptible[0] = this.N - this.nInfected[0] - this.nRecovered[0] - this.nDead[0] - this.nVaccinated[0];
+
+  // Assurez-vous que les valeurs ne sont pas négatives
+  this.nSusceptible[0] = Math.max(this.nSusceptible[0], 0);
+  this.nInfected[0] = Math.max(this.nInfected[0], 0);
+  this.nRecovered[0] = Math.max(this.nRecovered[0], 0);
+  this.nDead[0] = Math.max(this.nDead[0], 0);
+  this.nVaccinated[0] = Math.max(this.nVaccinated[0], 0);
 
   // Mise à jour du graphique
   this.chart.data.datasets[0].data.push((this.nSusceptible[0] / this.N) * 100);
