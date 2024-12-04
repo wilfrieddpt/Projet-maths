@@ -13,8 +13,8 @@ const Individual = function (state = State.S) {
   this.state = state
 }
 
-Individual.prototype.infect = function (rate) {
-  if (this.state == State.S && Math.random() <= rate) {
+Individual.prototype.infect = function (rate, reinfectionRate) {
+  if ((this.state == State.S || this.state == State.R || this.state == State.V) && Math.random() <= rate) {
     this.state = State.I
   }
 }
@@ -41,9 +41,9 @@ Individual.prototype.vaccinate = function (rate) {
 let StochasticSimulationDefaultConfig = {
   Nx: 10,
   Ny: 10,
-  iRate: 0,
-  rRate: 0,
-  vRate: 0,
+  iRate: 0.1,
+  rRate: 0.1,
+  vRate: 0.1,
   travelRadius: 3,
   nMeeting: 4,
   percentStartInfected: 0.01,
