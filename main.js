@@ -651,6 +651,7 @@ StochasticSimulation.prototype.stepSimulation = function () {
         } else if (neighbor.state === State.R) {
           neighbor.reinfect(this.config.reinfectionRateRecovered, 0);
           if (neighbor.state === State.I) {
+            this.nRecovered[0]--; // Décrémenter le compteur des guéris
             newInfected.add(neighborIndex);
             this.changedState.push(neighborIndex);
             newlyInfected++;
@@ -658,6 +659,7 @@ StochasticSimulation.prototype.stepSimulation = function () {
         } else if (neighbor.state === State.V) {
           neighbor.reinfect(0, this.config.reinfectionRateVaccinated);
           if (neighbor.state === State.I) {
+            this.nVaccinated[0]--; // Décrémenter le compteur des vaccinés
             newInfected.add(neighborIndex);
             this.changedState.push(neighborIndex);
             newlyInfected++;
