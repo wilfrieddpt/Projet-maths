@@ -166,6 +166,20 @@ StochasticSimulation.prototype.setupDraw = function () {
   let inputsArea = document.getElementById("controls")
   inputsArea.innerHTML = "" // clear previous controls
 
+  // Ajouter une case à cocher pour le mode "cluster"
+  let clusterCheckbox = document.createElement("input");
+  clusterCheckbox.type = "checkbox";
+  clusterCheckbox.checked = this.config.clusterMode;
+  clusterCheckbox.addEventListener("change", () => {
+    this.config.clusterMode = clusterCheckbox.checked;
+    this.reset();
+  });
+
+  let clusterLabel = document.createElement("label");
+  clusterLabel.innerHTML = "Mode Cluster";
+  inputsArea.appendChild(clusterLabel);
+  inputsArea.appendChild(clusterCheckbox);
+
   makeSlider(
     inputsArea,
     "Initialement infectés, I(0) (%)",
@@ -309,58 +323,58 @@ StochasticSimulation.prototype.setupDraw = function () {
     },
   )
 
-  let startStopButton = document.createElement("input")
-  let stepButton = document.createElement("input")
-  let resetButton = document.createElement("input")
+  let startStopButton = document.createElement("input");
+  let stepButton = document.createElement("input");
+  let resetButton = document.createElement("input");
 
-  startStopButton.type = "button"
-  startStopButton.value = "Démarrer"
+  startStopButton.type = "button";
+  startStopButton.value = "Démarrer";
   startStopButton.addEventListener("click", () => {
     if (this.runInterval == null) {
-      startStopButton.value = "Pause"
-      stepButton.disabled = true
-      this.run()
+      startStopButton.value = "Pause";
+      stepButton.disabled = true;
+      this.run();
     } else {
-      startStopButton.value = "Continuer"
-      stepButton.disabled = false
-      this.pause()
+      startStopButton.value = "Continuer";
+      stepButton.disabled = false;
+      this.pause();
     }
-  })
+  });
 
-  stepButton.type = "button"
-  stepButton.value = "Faire une étape"
+  stepButton.type = "button";
+  stepButton.value = "Faire une étape";
   stepButton.addEventListener("click", () => {
-    startStopButton.value = "Continuer"
-    if (this.runInterval == null) this.step()
-  })
+    startStopButton.value = "Continuer";
+    if (this.runInterval == null) this.step();
+  });
 
-  resetButton.type = "button"
-  resetButton.value = "Recommencer"
+  resetButton.type = "button";
+  resetButton.value = "Recommencer";
   resetButton.addEventListener("click", () => {
-    this.reset()
-    stepButton.disabled = false
-    startStopButton.value = "Commencer"
-  })
+    this.reset();
+    stepButton.disabled = false;
+    startStopButton.value = "Commencer";
+  });
 
-  let parent = document.createElement("p")
-  inputsArea.appendChild(parent)
+  let parent = document.createElement("p");
+  inputsArea.appendChild(parent);
 
-  parent.appendChild(startStopButton)
-  parent.appendChild(stepButton)
-  parent.appendChild(resetButton)
+  parent.appendChild(startStopButton);
+  parent.appendChild(stepButton);
+  parent.appendChild(resetButton);
 
   // setup SVG visualisation
-  let sz = this.config.dotRadius + this.config.dotPadding
+  let sz = this.config.dotRadius + this.config.dotPadding;
   this.svgArea = SVG()
     .addTo(this.ctx)
-    .size(this.config.Nx * sz, this.config.Ny * sz)
+    .size(this.config.Nx * sz, this.config.Ny * sz);
 
   // setup Chart.js canvas
-  let canvas = document.createElement("canvas")
-  canvas.id = "simulationChart"
-  canvas.width = Math.max(400, this.config.Nx * sz)
-  canvas.height = 400
-  this.ctx.appendChild(canvas)
+  let canvas = document.createElement("canvas");
+  canvas.id = "simulationChart";
+  canvas.width = Math.max(400, this.config.Nx * sz);
+  canvas.height = 400;
+  this.ctx.appendChild(canvas);
 
   this.chart = new Chart(canvas, {
     type: "line",
@@ -386,10 +400,10 @@ StochasticSimulation.prototype.setupDraw = function () {
           backgroundColor: this.config.colorRecoveredBg,
         },
         {
-            label: "Morts",
-            data: [],
-            borderColor: this.config.colorDead,
-            backgroundColor: this.config.colorDeadBg,
+          label: "Morts",
+          data: [],
+          borderColor: this.config.colorDead,
+          backgroundColor: this.config.colorDeadBg,
         },
         {
           label: "Vaccinés",
@@ -422,24 +436,24 @@ StochasticSimulation.prototype.setupDraw = function () {
       tooltips: {
         callbacks: {
           title: function (tooltipItem, data) {
-            return `Après ${tooltipItem[0].label} unité(s) de temps`
+            return `Après ${tooltipItem[0].label} unité(s) de temps`;
           },
           label: function (tooltipItem, data) {
-            let label = data.datasets[tooltipItem.datasetIndex].label || ""
+            let label = data.datasets[tooltipItem.datasetIndex].label || "";
 
             if (label) {
-              label += ": "
+              label += ": ";
             }
-            label += Math.round(tooltipItem.yLabel * 10) / 10 + "%"
-            return label
+            label += Math.round(tooltipItem.yLabel * 10) / 10 + "%";
+            return label;
           },
         },
       },
     },
-  })
+  });
 
-  this.resetDraw()
-}
+  this.resetDraw();
+};
 
 StochasticSimulation.prototype.resetDraw = function () {
   // reset svg
@@ -563,30 +577,52 @@ StochasticSimulation.prototype.selectNeighboursOf = function (index) {
 
 StochasticSimulation.prototype.setupSimulation = function () {
   // create individuals
-  this.individuals = []
+  this.individuals = [];
 
-  for (let i = 0; i < this.N; i++) this.individuals.push(new Individual())
+  for (let i = 0; i < this.N; i++) this.individuals.push(new Individual());
 
   // infect some of them
-  this.infected = []
-  this.changedState = []
+  this.infected = [];
+  this.changedState = [];
 
-  this.numStartInfected = Math.round(this.config.percentStartInfected * this.N)
+  this.numStartInfected = Math.round(this.config.percentStartInfected * this.N);
 
-  for (let i = 0; i < this.numStartInfected; i++) {
-    let index = parseInt(Math.floor(Math.random() * this.N))
-    this.individuals[index].state = State.I
-    this.infected.push(index)
-    this.changedState.push(index)
+  if (this.config.clusterMode) {
+    // Mode "cluster" : placer les infectés dans une même zone
+    let clusterCenterX = Math.floor(this.config.Nx / 2);
+    let clusterCenterY = Math.floor(this.config.Ny / 2);
+    let clusterRadius = Math.floor(Math.sqrt(this.numStartInfected));
+
+    for (let i = 0; i < this.numStartInfected; i++) {
+      let x = clusterCenterX + Math.floor(Math.random() * clusterRadius * 2) - clusterRadius;
+      let y = clusterCenterY + Math.floor(Math.random() * clusterRadius * 2) - clusterRadius;
+
+      // Assurez-vous que les coordonnées sont dans la grille
+      x = Math.max(0, Math.min(this.config.Nx - 1, x));
+      y = Math.max(0, Math.min(this.config.Ny - 1, y));
+
+      let index = this.toIndex([x, y]);
+      this.individuals[index].state = State.I;
+      this.infected.push(index);
+      this.changedState.push(index);
+    }
+  } else {
+    // Mode aléatoire : placer les infectés aléatoirement
+    for (let i = 0; i < this.numStartInfected; i++) {
+      let index = parseInt(Math.floor(Math.random() * this.N));
+      this.individuals[index].state = State.I;
+      this.infected.push(index);
+      this.changedState.push(index);
+    }
   }
 
   // keep the list of numbers for the graph
-  this.nSusceptible = [this.N - this.numStartInfected]
-  this.nInfected = [this.numStartInfected]
-  this.nRecovered = [0]
-  this.nDead = [0]
-  this.nVaccinated = [0]
-}
+  this.nSusceptible = [this.N - this.numStartInfected];
+  this.nInfected = [this.numStartInfected];
+  this.nRecovered = [0];
+  this.nDead = [0];
+  this.nVaccinated = [0];
+};
 
 StochasticSimulation.prototype.stepSimulation = function () {
   if (this.infected.length === 0) return; // Pas d'infectés : simulation terminée
